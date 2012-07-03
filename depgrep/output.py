@@ -8,17 +8,25 @@ def common(xs, ys):
     return i + 1
 
 
-def _tree_format(data, sep):
+def _tree_format(data):
     last = []
     for datum in data:
-        this = datum.split(sep)
-        level = common(this, last)
-        for new in this[level:]:
-            yield level, new
+        level = common(datum, last)
+        datum_size = len(datum) - 1
+        for new in datum[level:]:
+            yield level, new, level == datum_size
             level += 1
-        last = this
+        last = datum
 
 
-def tree_format(data, sep, indent='  '):
-    return '\n'.join(
-        indent * level + line for level, line in _tree_format(data, sep)) + '\n'
+def tree_format(output, data, sep, indent='  '):
+    w = output.write
+    data = sorted(datum.split(sep) for datum in data)
+    for level, line, leaf in _tree_format(data):
+        w(indent * level)
+        if leaf:
+            w('* ')
+        else:
+            w('- ')
+        w(line)
+        w('\n')

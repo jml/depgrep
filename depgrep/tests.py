@@ -94,22 +94,56 @@ class TestCommon(TestCase):
 class TestTreeOutput(TestCase):
 
     def test_one_level(self):
-        output = list(_tree_format(['foo', 'bar'], sep='.'))
-        self.assertThat(output, Equals([(0, 'foo'), (0, 'bar')]))
+        output = list(_tree_format([['foo'], ['bar']]))
+        self.assertThat(
+            output, Equals(
+                [(0, 'foo', True),
+                 (0, 'bar', True)]))
 
     def test_two_level(self):
-        output = list(_tree_format(['foo.bar', 'foo.baz'], sep='.'))
-        self.assertThat(output, Equals([(0, 'foo'), (1, 'bar'), (1, 'baz')]))
+        output = list(_tree_format([['foo' ,'bar'], ['foo', 'baz']]))
+        self.assertThat(
+            output, Equals(
+                [(0, 'foo', False),
+                 (1, 'bar', True),
+                 (1, 'baz', True)]))
 
     def test_two_branches(self):
-        output = list(_tree_format(['foo.bar', 'foo.baz', 'qux.bar'], sep='.'))
-        self.assertThat(output, Equals([(0, 'foo'), (1, 'bar'), (1, 'baz'),
-                                        (0, 'qux'), (1, 'bar')]))
+        output = list(_tree_format([['foo', 'bar'], ['foo', 'baz'], ['qux', 'bar']]))
+        self.assertThat(
+            output, Equals(
+                [(0, 'foo', False),
+                 (1, 'bar', True),
+                 (1, 'baz', True),
+                 (0, 'qux', False),
+                 (1, 'bar', True)]))
 
     def test_deeper_branches(self):
-        output = list(_tree_format(['foo.bar', 'foo.baz.qux', 'foo.bop'], sep='.'))
-        self.assertThat(output, Equals([(0, 'foo'), (1, 'bar'), (1, 'baz'),
-                                        (2, 'qux'), (1, 'bop')]))
+        output = list(_tree_format([['foo', 'bar'], ['foo', 'baz', 'qux'], ['foo', 'bop']]))
+        self.assertThat(
+            output, Equals(
+                [(0, 'foo', False),
+                 (1, 'bar', True),
+                 (1, 'baz', False),
+                 (2, 'qux', True),
+                 (1, 'bop', True)]))
+
+    def test_each_level(self):
+        output = list(_tree_format([['foo'], ['foo', 'bar'], ['foo', 'bar', 'baz']]))
+        self.assertThat(
+            output, Equals(
+                [(0, 'foo', True),
+                 (1, 'bar', True),
+                 (2, 'baz', True)]))
+
+    def test_single_deep_level(self):
+        output = list(_tree_format([['foo', 'bar', 'baz']]))
+        self.assertThat(
+            output, Equals(
+                [(0, 'foo', False),
+                 (1, 'bar', False),
+                 (2, 'baz', True)]))
+
 
 
 

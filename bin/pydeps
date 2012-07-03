@@ -8,7 +8,10 @@
 
 import argparse
 
+import sys
+
 from depgrep.scanner import find_imports
+from depgrep.output import tree_format
 
 
 parser = argparse.ArgumentParser()
@@ -20,5 +23,4 @@ for f in args.python_file:
     code = f.read()
     imports |= set(find_imports(code))
 
-for i in sorted(imports):
-    print i
+tree_format(sys.stdout, imports, '.')
