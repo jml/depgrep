@@ -1,0 +1,24 @@
+#!/usr/bin/python
+
+# XXX: Just throw this away.  Replace it with something that takes arguments
+# and figures out whether they are supposed to be files, directories, modules
+# or packages and recurses intelligently given that information.  Make sure it
+# has tests.
+
+
+import argparse
+
+from depgrep.scanner import find_imports
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('python_file', nargs='+', type=argparse.FileType('r'))
+args = parser.parse_args()
+
+imports = set()
+for f in args.python_file:
+    code = f.read()
+    imports |= set(find_imports(code))
+
+for i in sorted(imports):
+    print i
