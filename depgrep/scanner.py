@@ -32,9 +32,13 @@ def iter_imports(tree):
                         yield UNKNOWN_IMPORT
                     else:
                         if len(args) >= 4:
-                            froms = literal_eval(args[3])
-                            for from_import in froms:
-                                yield '%s.%s' % (module, from_import)
+                            try:
+                                froms = literal_eval(args[3])
+                            except ValueError:
+                                yield module
+                            else:
+                                for from_import in froms:
+                                    yield '%s.%s' % (module, from_import)
                         else:
                             yield module
 

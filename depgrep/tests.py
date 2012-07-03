@@ -48,6 +48,11 @@ from foo import (
             '__import__("foo", globals(), locals(), ["bar", "baz"])')
         self.assertThat(imports, SameMembers(['foo.bar', 'foo.baz']))
 
+    def test_manual_from_import_variable(self):
+        imports = find_imports(
+            '__import__("foo", globals(), locals(), [bar, "baz"])')
+        self.assertThat(imports, SameMembers(['foo']))
+
 
 # TODO: For found imports, distinguish which part is the module and which part
 # is the name within the module. (use sys.path)
