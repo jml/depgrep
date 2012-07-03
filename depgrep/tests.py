@@ -1,7 +1,8 @@
 from testtools import TestCase
-from testtools.matchers import SameMembers
+from testtools.matchers import Equals, SameMembers
 
 from .scanner import find_imports, UNKNOWN_IMPORT
+from .output import _tree_format, common
 
 
 class TestImports(TestCase):
@@ -52,6 +53,64 @@ from foo import (
         imports = find_imports(
             '__import__("foo", globals(), locals(), [bar, "baz"])')
         self.assertThat(imports, SameMembers(['foo']))
+
+
+class TestIterPythonFiles(TestCase):
+
+    # Given a Python file named '*.py', include that.
+    # Given a directory find all Python files:
+    # - either named '*.py'
+    # Given a module name, get the file for that
+    # Given a package name, find all the modules
+
+    pass
+
+
+
+class TestCommon(TestCase):
+    
+    def test_equal_lists(self):
+        x = [1, 2, 3, 4]
+        self.assertEqual(len(x), common(x, x))
+
+    def test_sublist(self):
+        x = [1, 2, 3, 4]
+        self.assertEqual(2, common(x, x[:2]))
+
+    def test_fork(self):
+        x = [1, 2, 3, 4]
+        y = [1, 2, 5, 6]
+        self.assertEqual(2, common(x, y))
+
+    def test_empty(self):
+        self.assertEqual(0, common([], []))
+
+    def test_different(self):
+        x = [2, 3, 4, 5]
+        y = [1, 2, 3, 4]
+        self.assertEqual(0, common(x, y))
+
+
+class TestTreeOutput(TestCase):
+
+    def test_one_level(self):
+        output = list(_tree_format(['foo', 'bar'], sep='.'))
+        self.assertThat(output, Equals([(0, 'foo'), (0, 'bar')]))
+
+    def test_two_level(self):
+        output = list(_tree_format(['foo.bar', 'foo.baz'], sep='.'))
+        self.assertThat(output, Equals([(0, 'foo'), (1, 'bar'), (1, 'baz')]))
+
+    def test_two_branches(self):
+        output = list(_tree_format(['foo.bar', 'foo.baz', 'qux.bar'], sep='.'))
+        self.assertThat(output, Equals([(0, 'foo'), (1, 'bar'), (1, 'baz'),
+                                        (0, 'qux'), (1, 'bar')]))
+
+    def test_deeper_branches(self):
+        output = list(_tree_format(['foo.bar', 'foo.baz.qux', 'foo.bop'], sep='.'))
+        self.assertThat(output, Equals([(0, 'foo'), (1, 'bar'), (1, 'baz'),
+                                        (2, 'qux'), (1, 'bop')]))
+
 
 
 # TODO: For found imports, distinguish which part is the module and which part
