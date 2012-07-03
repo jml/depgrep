@@ -55,20 +55,8 @@ from foo import (
         self.assertThat(imports, SameMembers(['foo']))
 
 
-class TestIterPythonFiles(TestCase):
-
-    # Given a Python file named '*.py', include that.
-    # Given a directory find all Python files:
-    # - either named '*.py'
-    # Given a module name, get the file for that
-    # Given a package name, find all the modules
-
-    pass
-
-
-
 class TestCommon(TestCase):
-    
+
     def test_equal_lists(self):
         x = [1, 2, 3, 4]
         self.assertEqual(len(x), common(x, x))
@@ -146,11 +134,8 @@ class TestTreeOutput(TestCase):
 
 
 
-
 # TODO: For found imports, distinguish which part is the module and which part
 # is the name within the module. (use sys.path)
-
-# TODO: Command-line script
 
 # TODO: Show files for found modules (use sys.path)
 
@@ -162,8 +147,6 @@ class TestTreeOutput(TestCase):
 
 # XXX: Not sure what to do about imports in function definitions, for example.
 
-# TODO: Handle from-style imports using __import__
-
 # TODO: Distinguish between used imports and unused imports.
 
-# TODO: Tree-style output
+# TODO: Check doctests as well.

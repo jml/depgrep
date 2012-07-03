@@ -14,13 +14,20 @@ from depgrep.scanner import find_imports
 from depgrep.output import tree_format
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('python_file', nargs='+', type=argparse.FileType('r'))
-args = parser.parse_args()
+def make_arg_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('python_file', nargs='+', type=argparse.FileType('r'))
+    return parser
 
-imports = set()
-for f in args.python_file:
-    code = f.read()
-    imports |= set(find_imports(code))
 
-tree_format(sys.stdout, imports, '.')
+def main():
+    parser = make_arg_parser()
+    args = parser.parse_args()
+    imports = set()
+    for f in args.python_file:
+        code = f.read()
+        imports |= set(find_imports(code))
+    tree_format(sys.stdout, imports, '.')
+
+
+main()
