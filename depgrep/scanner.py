@@ -1,7 +1,7 @@
 import textwrap
 import _ast
 
-from ast import iter_child_nodes
+from ast import iter_child_nodes, literal_eval
 
 
 UNKNOWN_IMPORT = object()
@@ -25,11 +25,18 @@ def iter_imports(tree):
             if isinstance(node.value, _ast.Call):
                 func = node.value.func
                 if func.id == '__import__':
-                    arg = node.value.args[0]
-                    if isinstance(arg, _ast.Str):
-                        yield arg.s
-                    else:
+                    args = node.value.args
+                    try:
+                        module = literal_eval(args[0])
+                    except ValueError:
                         yield UNKNOWN_IMPORT
+                    else:
+                        if len(args) >= 4:
+                            froms = literal_eval(args[3])
+                            for from_import in froms:
+                                yield '%s.%s' % (module, from_import)
+                        else:
+                            yield module
 
 
 def find_imports(python_code):

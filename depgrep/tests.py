@@ -43,6 +43,11 @@ from foo import (
         imports = find_imports('__import__(foo)')
         self.assertThat(imports, SameMembers([UNKNOWN_IMPORT]))
 
+    def test_manual_from_import(self):
+        imports = find_imports(
+            '__import__("foo", globals(), locals(), ["bar", "baz"])')
+        self.assertThat(imports, SameMembers(['foo.bar', 'foo.baz']))
+
 
 # TODO: For found imports, distinguish which part is the module and which part
 # is the name within the module. (use sys.path)
@@ -58,3 +63,9 @@ from foo import (
 # TODO: Search the sys.path to find things that import X.
 
 # XXX: Not sure what to do about imports in function definitions, for example.
+
+# TODO: Handle from-style imports using __import__
+
+# TODO: Distinguish between used imports and unused imports.
+
+# TODO: Tree-style output
