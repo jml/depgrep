@@ -54,6 +54,16 @@ from foo import (
             '__import__("foo", globals(), locals(), [bar, "baz"])')
         self.assertThat(imports, SameMembers(['foo']))
 
+    def test_deeper_import(self):
+        imports = find_imports('''
+def f():
+    import bar
+''')
+        self.assertThat(imports, SameMembers(['bar']))
+
+    def test_doesnt_break(self):
+        find_imports('''logging.setLevel(logging.INFO)''')
+
 
 class TestCommon(TestCase):
 

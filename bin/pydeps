@@ -15,7 +15,9 @@ from depgrep.output import tree_format
 
 
 def make_arg_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Get immediate imports from Python files")
+    parser.add_argument('--format', choices=['tree', 'flat'], default='flat')
     parser.add_argument('python_file', nargs='+', type=argparse.FileType('r'))
     return parser
 
@@ -27,7 +29,10 @@ def main():
     for f in args.python_file:
         code = f.read()
         imports |= set(find_imports(code))
-    tree_format(sys.stdout, imports, '.')
-
+    if args.format == 'tree':
+        tree_format(sys.stdout, imports, '.')
+    else:
+        for x in sorted(imports):
+            print x
 
 main()

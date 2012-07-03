@@ -1,49 +1,53 @@
 import textwrap
-import _ast
-
-from ast import iter_child_nodes, literal_eval
+import ast
 
 
 UNKNOWN_IMPORT = object()
 
 
 def get_ast(python_code):
-    return compile(
-        textwrap.dedent(python_code), "<test>", "exec", _ast.PyCF_ONLY_AST)
+    return ast.parse(textwrap.dedent(python_code), "<test>")
 
 
-def iter_imports(tree):
-    for node in iter_child_nodes(tree):
-        if isinstance(node, _ast.Import):
-            for alias in node.names:
-                yield alias.name
-        elif isinstance(node, _ast.ImportFrom):
-            module = node.module
-            for alias in node.names:
-                yield '%s.%s' % (module, alias.name)
-        elif isinstance(node, _ast.Expr):
-            if isinstance(node.value, _ast.Call):
-                func = node.value.func
-                if func.id == '__import__':
-                    args = node.value.args
-                    try:
-                        module = literal_eval(args[0])
-                    except ValueError:
-                        yield UNKNOWN_IMPORT
-                    else:
-                        if len(args) >= 4:
-                            try:
-                                froms = literal_eval(args[3])
-                            except ValueError:
-                                yield module
-                            else:
-                                for from_import in froms:
-                                    yield '%s.%s' % (module, from_import)
-                        else:
-                            yield module
+class ImportFinder(ast.NodeVisitor):
+
+    def __init__(self, got_import):
+        self.got_import = got_import
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            self.got_import(alias.name)
+
+    def visit_ImportFrom(self, node):
+        module = node.module
+        for alias in node.names:
+            self.got_import('%s.%s' % (module, alias.name))
+
+    def visit_Call(self, node):
+        if getattr(node.func, 'id', None) != '__import__':
+            return self.generic_visit(node)
+        args = node.args
+        try:
+            module = ast.literal_eval(args[0])
+        except ValueError:
+            self.got_import(UNKNOWN_IMPORT)
+        else:
+            if len(args) >= 4:
+                try:
+                    froms = ast.literal_eval(args[3])
+                except ValueError:
+                    self.got_import(module)
+                else:
+                    for from_import in froms:
+                        self.got_import('%s.%s' % (module, from_import))
+            else:
+                self.got_import(module)
 
 
 def find_imports(python_code):
     """Find all of the imports in 'python_code'."""
+    imports = []
     tree = get_ast(python_code)
-    return list(iter_imports(tree))
+    finder = ImportFinder(imports.append)
+    finder.visit(tree)
+    return imports
