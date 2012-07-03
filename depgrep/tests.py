@@ -26,10 +26,15 @@ class TestImports(TestCase):
         imports = find_imports("from foo import bar, baz")
         self.assertThat(imports, SameMembers(['foo.bar', 'foo.baz']))
 
+    def test_multiline_from_import(self):
+        imports = find_imports("""
+from foo import (
+    bar,
+    baz,
+)
+""")
+        self.assertThat(imports, SameMembers(['foo.bar', 'foo.baz']))
 
-# TODO: Actually use a Python syntax parser.
-
-# TODO: Support multi-line 'from foo import (...)' style imports
 
 # TODO: For found imports, distinguish which part is the module and which part
 # is the name within the module. (use sys.path)
@@ -45,4 +50,3 @@ class TestImports(TestCase):
 # TODO: Search the sys.path to find things that import X.
 
 # XXX: Not sure what to do about imports in function definitions, for example.
-
