@@ -4,6 +4,9 @@ import _ast
 from ast import iter_child_nodes
 
 
+UNKNOWN_IMPORT = object()
+
+
 def get_ast(python_code):
     return compile(
         textwrap.dedent(python_code), "<test>", "exec", _ast.PyCF_ONLY_AST)
@@ -18,6 +21,15 @@ def iter_imports(tree):
             module = node.module
             for alias in node.names:
                 yield '%s.%s' % (module, alias.name)
+        elif isinstance(node, _ast.Expr):
+            if isinstance(node.value, _ast.Call):
+                func = node.value.func
+                if func.id == '__import__':
+                    arg = node.value.args[0]
+                    if isinstance(arg, _ast.Str):
+                        yield arg.s
+                    else:
+                        yield UNKNOWN_IMPORT
 
 
 def find_imports(python_code):

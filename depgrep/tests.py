@@ -1,7 +1,7 @@
 from testtools import TestCase
 from testtools.matchers import SameMembers
 
-from .scanner import find_imports
+from .scanner import find_imports, UNKNOWN_IMPORT
 
 
 class TestImports(TestCase):
@@ -34,6 +34,14 @@ from foo import (
 )
 """)
         self.assertThat(imports, SameMembers(['foo.bar', 'foo.baz']))
+
+    def test_manual_import(self):
+        imports = find_imports('__import__("foo")')
+        self.assertThat(imports, SameMembers(['foo']))
+
+    def test_manual_import_variable(self):
+        imports = find_imports('__import__(foo)')
+        self.assertThat(imports, SameMembers([UNKNOWN_IMPORT]))
 
 
 # TODO: For found imports, distinguish which part is the module and which part
